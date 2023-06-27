@@ -1,0 +1,805 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>大数据——ClickHouse | ccbigs blog</title><meta name="author" content="DingQuan Zuo"><meta name="copyright" content="DingQuan Zuo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="第 1 章 ClickHouse 入门ClickHouse 是俄罗斯的 Yandex 于 2016 年开源的列式存储数据库（DBMS），使用 C++ 语言编写，主要用于在线分析处理查询（OLAP），能够使用 SQL 查询实时生成分析数据报告。 ClickHouse 的特点列式存储以下面的表为例：   1）采用行式存储时，数据在磁盘上的组织结构为：   &#x3D;&#x3D;好处是想查某个人所有的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据——ClickHouse">
+<meta property="og:url" content="http://example.com/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94ClickHouse/index.html">
+<meta property="og:site_name" content="ccbigs blog">
+<meta property="og:description" content="第 1 章 ClickHouse 入门ClickHouse 是俄罗斯的 Yandex 于 2016 年开源的列式存储数据库（DBMS），使用 C++ 语言编写，主要用于在线分析处理查询（OLAP），能够使用 SQL 查询实时生成分析数据报告。 ClickHouse 的特点列式存储以下面的表为例：   1）采用行式存储时，数据在磁盘上的组织结构为：   &#x3D;&#x3D;好处是想查某个人所有的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/ahead.jpg">
+<meta property="article:published_time" content="2023-06-27T04:14:07.000Z">
+<meta property="article:modified_time" content="2023-06-27T04:18:17.377Z">
+<meta property="article:author" content="DingQuan Zuo">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/ahead.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94ClickHouse/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '大数据——ClickHouse',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-06-27 12:18:17'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/ahead.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/1558.png')"><nav id="nav"><span id="blog-info"><a href="/" title="ccbigs blog"><img class="site-icon" src="/img/favicon.png"/><span class="site-name">ccbigs blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">大数据——ClickHouse</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-06-27T04:14:07.000Z" title="发表于 2023-06-27 12:14:07">2023-06-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-06-27T04:18:17.377Z" title="更新于 2023-06-27 12:18:17">2023-06-27</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">8.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>35分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="大数据——ClickHouse"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="第-1-章-ClickHouse-入门"><a href="#第-1-章-ClickHouse-入门" class="headerlink" title="第 1 章 ClickHouse 入门"></a>第 1 章 ClickHouse 入门</h1><p>ClickHouse 是俄罗斯的 Yandex 于 2016 年开源的<strong>列式存储数据库</strong>（DBMS），使用 C++ 语言编写，主要用于<strong>在线分析处理查询（OLAP）</strong>，能够使用 SQL 查询实时生成分析数据报告。</p>
+<h2 id="ClickHouse-的特点"><a href="#ClickHouse-的特点" class="headerlink" title="ClickHouse 的特点"></a>ClickHouse 的特点</h2><h3 id="列式存储"><a href="#列式存储" class="headerlink" title="列式存储"></a>列式存储</h3><p>以下面的表为例：</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125110334263.png" alt="image-20220125110334263"></p>
+<blockquote>
+<p>1）采用行式存储时，数据在磁盘上的组织结构为：</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125110355965.png" alt="image-20220125110355965"></p>
+<p>&#x3D;&#x3D;好处是想查某个人所有的属性时，可以通过一次磁盘查找加顺序读取就可以。但是当想 查所有人的年龄时，需要不停的查找，或者全表扫描才行，遍历的很多数据都是不需要的。&#x3D;&#x3D;</p>
+<blockquote>
+<p>2）采用列式存储时，数据在磁盘上的组织结构为：</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125110429955.png" alt="image-20220125110429955"></p>
+<p>&#x3D;&#x3D;这时想查所有人的年龄只需把年龄那一列拿出来就可以了&#x3D;&#x3D;</p>
+<blockquote>
+<p>3）列式储存的好处： </p>
+</blockquote>
+<p>➢ 对于列的聚合，计数，求和等统计操作原因优于行式存储。</p>
+<p>➢ 由于某一列的数据类型都是相同的，针对于数据存储更容易进行数据压缩，每一列 选择更优的数据压缩算法，大大提高了数据的压缩比重。 </p>
+<p>➢ 由于数据压缩比更好，一方面节省了磁盘空间，另一方面对于 cache 也有了更大的 发挥空间。</p>
+<h3 id="DBMS-的功能"><a href="#DBMS-的功能" class="headerlink" title="DBMS 的功能"></a>DBMS 的功能</h3><p>几乎覆盖了标准 SQL 的大部分语法，包括 DDL 和 DML，以及配套的各种函数，用户管 理及权限管理，数据的备份与恢复。 </p>
+<h3 id="多样化引擎"><a href="#多样化引擎" class="headerlink" title="多样化引擎"></a>多样化引擎</h3><p>ClickHouse 和 MySQL 类似，把表级的存储引擎插件化，根据表的不同需求可以设定不同 的存储引擎。目前包括合并树、日志、接口和其他四大类 20 多种引擎。 </p>
+<h3 id="高吞吐写入能力"><a href="#高吞吐写入能力" class="headerlink" title="高吞吐写入能力"></a>高吞吐写入能力</h3><p> ClickHouse 采用类 LSM Tree的结构，数据写入后定期在后台 Compaction。通过类 LSM tree 的结构，ClickHouse 在数据导入时全部是顺序 append 写，写入后数据段不可更改，在后台 compaction 时也是多个段 merge sort （归并排序）后顺序写回磁盘。顺序写的特性，充分利用了磁盘的吞 吐能力，即便在 HDD 上也有着优异的写入性能。</p>
+<p>官方公开 benchmark 测试显示能够达到 50MB-200MB&#x2F;s 的写入吞吐能力，按照每行 100Byte 估算，大约相当于 50W-200W 条&#x2F;s 的写入速度。</p>
+<h3 id="数据分区与线程级并行"><a href="#数据分区与线程级并行" class="headerlink" title="数据分区与线程级并行"></a>数据分区与线程级并行</h3><p>ClickHouse 将数据划分为多个 partition，每个 partition 再进一步划分为多个 index  granularity(索引粒度)，然后通过多个 CPU核心分别处理其中的一部分来实现并行数据处理。 在这种设计下，单条 Query 就能利用整机所有 CPU。极致的并行处理能力，极大的降低了查 询延时。 </p>
+<p>所以，ClickHouse 即使对于大量数据的查询也能够化整为零平行处理。但是有一个弊端 就是对于单条查询使用多 cpu，就不利于同时并发多条查询。所以对于高 qps 的查询业务， ClickHouse 并不是强项。</p>
+<h3 id="性能对比"><a href="#性能对比" class="headerlink" title="性能对比"></a>性能对比</h3><p>某网站精华帖，中对几款数据库做了性能对比。</p>
+<blockquote>
+<p>1）单表查询</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125111844709.png" alt="image-20220125111844709"></p>
+<blockquote>
+<p>2）关联查询</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125111930585.png" alt="image-20220125111930585"></p>
+<p>结论: ClickHouse 像很多 OLAP 数据库一样，单表查询速度由于关联查询，而且 ClickHouse 的两者差距更为明显。</p>
+<h1 id="第-2-章-ClickHouse-的安装"><a href="#第-2-章-ClickHouse-的安装" class="headerlink" title="第 2 章 ClickHouse 的安装"></a>第 2 章 ClickHouse 的安装</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h3 id="确定防火墙处于关闭状态"><a href="#确定防火墙处于关闭状态" class="headerlink" title="确定防火墙处于关闭状态"></a>确定防火墙处于关闭状态</h3><h3 id="CentOS-取消打开文件数限制"><a href="#CentOS-取消打开文件数限制" class="headerlink" title="CentOS 取消打开文件数限制"></a>CentOS 取消打开文件数限制</h3><blockquote>
+<p>（1）在 hadoop101 的 &#x2F;etc&#x2F;security&#x2F;limits.conf 文件的末尾加入以下内容</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 ~]$ sudo vim /etc/security/limits.conf</span><br><span class="line">* soft nofile 65536</span><br><span class="line">* hard nofile 65536</span><br><span class="line">* soft <span class="built_in">nproc</span> 131072</span><br><span class="line">* hard <span class="built_in">nproc</span> 131072</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125115609225.png" alt="image-20220125115609225"></p>
+<blockquote>
+<p>（2）在 hadoop101 的&#x2F;etc&#x2F;security&#x2F;limits.d&#x2F;20-nproc.conf 文件的末尾加入以下内容</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 ~]$ sudo vim /etc/security/limits.d/20-nproc.conf</span><br><span class="line">* soft nofile 65536</span><br><span class="line">* hard nofile 65536</span><br><span class="line">* soft <span class="built_in">nproc</span> 131072</span><br><span class="line">* hard <span class="built_in">nproc</span> 131072</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>（3）执行同步操作</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 bin]$  sudo /home/atguigu/bin/xsync.sh /etc/security/limits.conf</span><br><span class="line">[atguigu@hadoop101 ~]$ sudo /home/atguigu/bin/xsync.sh /etc/security/limits.d/20-nproc.conf</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 bin]$  sudo yum install -y libtool</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125121124438.png" alt="image-20220125121124438"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 bin]$ sudo yum install -y *unixODBC*</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125121149676.png" alt="image-20220125121149676"></p>
+<p>在 hadoop103、hadoop104 上执行以上操作 </p>
+<h3 id="CentOS-取消-SELINUX"><a href="#CentOS-取消-SELINUX" class="headerlink" title="CentOS 取消 SELINUX"></a>CentOS 取消 SELINUX</h3><p>SELINUX ：Linux的安全增强，内核级别</p>
+<blockquote>
+<p>（1）修改&#x2F;etc&#x2F;selinux&#x2F;config 中的 SELINUX&#x3D;disabled</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop102 ~]$ sudo vim /etc/selinux/config</span><br><span class="line">SELINUX=disabled</span><br><span class="line">注意：别改错了</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>（2）执行同步操作</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop102 ~]$ sudo /home/atguigu/bin/xsync.sh /etc/selinux/config</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> （3）重启三台服务器</p>
+</blockquote>
+<h2 id="单机安装"><a href="#单机安装" class="headerlink" title="单机安装"></a>单机安装</h2><p>官网：<a target="_blank" rel="noopener" href="https://clickhouse.tech/">https://clickhouse.tech/</a> </p>
+<p>下载地址：<a target="_blank" rel="noopener" href="http://repo.red-soft.biz/repos/clickhouse/stable/el7/">http://repo.red-soft.biz/repos/clickhouse/stable/el7/</a> </p>
+<h3 id="在-hadoop102-的-x2F-opt-x2F-software-下创建-clickhouse-目录"><a href="#在-hadoop102-的-x2F-opt-x2F-software-下创建-clickhouse-目录" class="headerlink" title="在 hadoop102 的&#x2F;opt&#x2F;software 下创建 clickhouse 目录"></a>在 hadoop102 的&#x2F;opt&#x2F;software 下创建 clickhouse 目录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 clickhouse]$ <span class="built_in">pwd</span></span><br><span class="line">/home/atguigu/clickhouse</span><br><span class="line">[atguigu@hadoop101 clickhouse]$ ll</span><br><span class="line">总用量 938164</span><br><span class="line">-rw-r--r-- 1 root root     78074 7月  27 08:41 clickhouse-client-21.7.3.14-2.noarch.rpm</span><br><span class="line">-rw-r--r-- 1 root root 174283244 7月  27 08:42 clickhouse-common-static-21.7.3.14-2.x86_64.rpm</span><br><span class="line">-rw-r--r-- 1 root root 786208040 7月  27 08:45 clickhouse-common-static-dbg-21.7.3.14-2.x86_64.rpm</span><br><span class="line">-rw-r--r-- 1 root root    101969 7月  27 08:40 clickhouse-server-21.7.3.14-2.noarch.rpm</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="移动到software"><a href="#移动到software" class="headerlink" title="移动到software"></a>移动到software</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 ~]$ <span class="built_in">mv</span> clickhouse /opt/software/</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="将安装文件同步到-hadoop100、hadoop102"><a href="#将安装文件同步到-hadoop100、hadoop102" class="headerlink" title="将安装文件同步到 hadoop100、hadoop102"></a>将安装文件同步到 hadoop100、hadoop102</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 ~]$ xsync.sh /opt/software/clickhouse</span><br></pre></td></tr></table></figure>
+
+<h3 id="分别在三台机子上安装这-4-个-rpm-文件"><a href="#分别在三台机子上安装这-4-个-rpm-文件" class="headerlink" title="分别在三台机子上安装这 4 个 rpm 文件"></a>分别在三台机子上安装这 4 个 rpm 文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 clickhouse]$ sudo rpm -ivh *.rpm</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125124444164.png" alt="image-20220125124444164"></p>
+<p>sudo rpm -qa|grep clickhouse 查看安装情况</p>
+<p><strong>安装后clickhouse相对于的文件：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bin/  -&gt; /usr/bin</span><br><span class="line">conf/ -&gt; /etc/clockhouse-server/</span><br><span class="line">lib/  -&gt; /var/lib/clickhouse</span><br><span class="line">log/  -&gt; /var/log/clickhouse</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125132441161.png" alt="image-20220125132441161"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 clickhouse]$ sudo vim /etc/clickhouse-server/config.xml </span><br></pre></td></tr></table></figure>
+
+<p>（1）把 :: 的注释打开，这样的话才能让 ClickHouse 被除本 机以外的服务器访问</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125132752068.png" alt="image-20220125132752068"></p>
+<p>（2）分发配置文件 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo /home/atguigu/bin/xsync.sh /etc/clickhouse-server/config.xml</span><br></pre></td></tr></table></figure>
+
+<p> 在这个文件中，有 ClickHouse 的一些默认路径配置，比较重要的 </p>
+<p>数据文件路径：&#x2F;var&#x2F;lib&#x2F;clickhouse&#x2F; </p>
+<p>日志文件路径：&#x2F;var&#x2F;log&#x2F;clickhouse-server&#x2F;clickhouse-server.log</p>
+<h3 id="启动-Server"><a href="#启动-Server" class="headerlink" title="启动 Server"></a>启动 Server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 ~]$ sudo systemctl start clickhouse-server</span><br><span class="line">[atguigu@hadoop101 ~]$ sudo clickhouse status</span><br><span class="line">/var/run/clickhouse-server/clickhouse-server.pid file exists and contains pid = 16221.</span><br><span class="line">The process with pid = 16221 is running.</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="使用-client-连接-server"><a href="#使用-client-连接-server" class="headerlink" title="使用 client 连接 server"></a>使用 client 连接 server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop102 clickhouse]$ clickhouse-client -m</span><br></pre></td></tr></table></figure>
+
+<p>-m :可以在命令窗口输入多行命令</p>
+<h3 id="卸载-clickHouse"><a href="#卸载-clickHouse" class="headerlink" title="卸载 clickHouse"></a>卸载 clickHouse</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@hadoop101 clickHouse]<span class="comment"># sudo rpm -qa|grep clickhouse</span></span><br><span class="line">clickhouse-common-static-dbg-20.4.5.36-2.x86_64</span><br><span class="line">clickhouse-common-static-20.4.5.36-2.x86_64</span><br><span class="line">clickhouse-server-20.4.5.36-2.noarch</span><br><span class="line">clickhouse-client-20.4.5.36-2.noarch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 卸载及删除安装文件（需root权限）</span></span><br><span class="line">yum list installed | grep clickhouse</span><br><span class="line">yum remove -y clickhouse-common-static</span><br><span class="line">yum remove -y clickhouse-server-common</span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/clickhouse</span><br><span class="line"><span class="built_in">rm</span> -rf /etc/clickhouse-*</span><br><span class="line"><span class="built_in">rm</span> -rf /var/log/clickhouse-server</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="第-3-章-数据类型"><a href="#第-3-章-数据类型" class="headerlink" title="第 3 章 数据类型"></a>第 3 章 数据类型</h1><h2 id="整型"><a href="#整型" class="headerlink" title="整型"></a>整型</h2><p>固定长度的整型，包括有符号整型或无符号整型。 </p>
+<p>整型范围（-2n-1~2n-1-1）：</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125135628178.png" alt="image-20220125135628178"></p>
+<p>无符号整型范围（0~2n-1）：</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125135643695.png" alt="image-20220125135643695"></p>
+<p><strong>使用场景： 个数、数量、也可以存储型 id。</strong></p>
+<h2 id="浮点型"><a href="#浮点型" class="headerlink" title="浮点型"></a>浮点型</h2><p>Float32 - float </p>
+<p>Float64 – double </p>
+<p>建议尽可能以整数形式存储数据。例如，将固定精度的数字转换为整数值，如时间用毫秒为单位表示，因为浮点型进行计算时可能引起四舍五入的误差。</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125152346573.png" alt="image-20220125152346573"></p>
+<p><strong>使用场景：一般数据值比较小，不涉及大量的统计计算，精度要求不高的时候。比如 保存商品的重量。</strong></p>
+<h2 id="布尔型"><a href="#布尔型" class="headerlink" title="布尔型"></a>布尔型</h2><p>没有单独的类型来存储布尔值。可以使用 UInt8 类型，取值限制为 0 或 1。</p>
+<h2 id="Decimal-型"><a href="#Decimal-型" class="headerlink" title="Decimal 型"></a>Decimal 型</h2><p>有符号的浮点数，可在加、减和乘法运算过程中保持精度。对于除法，最低有效数字会 被丢弃（不舍入）。 </p>
+<p>有三种声明： 括号里面表示小数位</p>
+<p>​	➢ Decimal32(s)，相当于 Decimal(9-s,s)，有效位数为 1~9 </p>
+<p>​	➢ Decimal64(s)，相当于 Decimal(18-s,s)，有效位数为 1~18 </p>
+<p>​	➢ Decimal128(s)，相当于 Decimal(38-s,s)，有效位数为 1~38 </p>
+<p><strong>s 标识小数位</strong> </p>
+<p><strong>使用场景： 一般金额字段、汇率、利率等字段为了保证小数点精度，都使用 Decimal 进行存储。</strong></p>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><blockquote>
+<p>1）String </p>
+</blockquote>
+<p>字符串可以任意长度的。它可以包含任意的字节集，包含空字节。 </p>
+<blockquote>
+<p>2）FixedString(N) </p>
+</blockquote>
+<p>固定长度 N 的字符串，N 必须是严格的正自然数。当服务端读取长度小于 N 的字符 串时候，通过在字符串末尾添加空字节来达到 N 字节长度。 当服务端读取长度大于 N 的 字符串时候，将返回错误消息。 </p>
+<p>与 String 相比，极少会使用 FixedString，因为使用起来不是很方便。</p>
+<p><strong>使用场景：名称、文字描述、字符型编码。 固定长度的可以保存一些定长的内容，比 如一些编码，性别等但是考虑到一定的变化风险，带来收益不够明显，所以定长字符串使用 意义有限。</strong></p>
+<h2 id="枚举类型"><a href="#枚举类型" class="headerlink" title="枚举类型"></a>枚举类型</h2><p>包括 Enum8 和 Enum16 类型。Enum 保存 ‘string’&#x3D; integer 的对应关系。 </p>
+<p>Enum8 用 ‘String’&#x3D; Int8 对描述。 </p>
+<p>Enum16 用 ‘String’&#x3D; Int16 对描述。 </p>
+<blockquote>
+<p>1）用法演示 </p>
+</blockquote>
+<p>创建一个带有一个枚举 Enum8(‘hello’ &#x3D; 1, ‘world’ &#x3D; 2) 类型的列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t_enum</span><br><span class="line">(</span><br><span class="line"> x Enum8(<span class="string">&#x27;hello&#x27;</span> <span class="operator">=</span> <span class="number">1</span>, <span class="string">&#x27;world&#x27;</span> <span class="operator">=</span> <span class="number">2</span>)</span><br><span class="line">)</span><br><span class="line">ENGINE <span class="operator">=</span> TinyLog;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>2）这个 x 列只能存储类型定义中列出的值：’hello’或’world’</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">INSERT</span> <span class="keyword">INTO</span> t_enum <span class="keyword">VALUES</span> (<span class="string">&#x27;hello&#x27;</span>), (<span class="string">&#x27;world&#x27;</span>), (<span class="string">&#x27;hello&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>3）如果尝试保存任何其他值，ClickHouse 抛出异常</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">insert</span> <span class="keyword">into</span> t_enum <span class="keyword">values</span>(<span class="string">&#x27;a&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>4）如果需要看到对应行的数值，则必须将 Enum 值转换为整数类型</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">SELECT</span> <span class="built_in">CAST</span>(x, <span class="string">&#x27;Int8&#x27;</span>) <span class="keyword">FROM</span> t_enum;</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用场景：对一些状态、类型的字段算是一种空间优化，也算是一种数据约束。但是实 际使用中往往因为一些数据内容的变化增加一定的维护成本，甚至是数据丢失问题。所以谨慎使用。</strong></p>
+<h2 id="时间类型"><a href="#时间类型" class="headerlink" title="时间类型"></a>时间类型</h2><p>目前 ClickHouse 有三种时间类型 </p>
+<p>➢ Date 接受年-月-日的字符串比如 ‘2019-12-16’ </p>
+<p>➢ Datetime 接受年-月-日 时:分:秒的字符串比如 ‘2019-12-16 20:50:10’ </p>
+<p>➢ Datetime64 接受年-月-日 时:分:秒.亚秒 的字符串比如‘2019-12-16 20:50:10.66’ </p>
+<p>日期类型，用两个字节存储，表示从 1970-01-01 (无符号) 到当前的日期值。 </p>
+<p>还有很多数据结构，可以参考官方文档：<a target="_blank" rel="noopener" href="https://clickhouse.yandex/docs/zh/data_types/">https://clickhouse.yandex/docs/zh/data_types/</a></p>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>Array(T)：由 T 类型元素组成的数组。 </p>
+<p>T 可以是任意类型，包含数组类型。 但不推荐使用多维数组，ClickHouse 对多维数组 的支持有限。例如，不能在 MergeTree 表中存储多维数组。 </p>
+<blockquote>
+<p>（1）创建数组方式 1，使用 array 函数</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">array</span>(T)</span><br><span class="line">hadoop102 :) <span class="keyword">SELECT</span> <span class="keyword">array</span>(<span class="number">1</span>, <span class="number">2</span>) <span class="keyword">AS</span> x, toTypeName(x) ;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125153600855.png" alt="image-20220125153600855"></p>
+<blockquote>
+<p>（2）创建数组方式 2：使用方括号</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[]</span><br><span class="line">hadoop102 :) <span class="keyword">SELECT</span> [<span class="number">1</span>, <span class="number">2</span>] <span class="keyword">AS</span> x, toTypeName(x);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125153706963.png" alt="image-20220125153706963"></p>
+<h1 id="第-4-章-表引擎"><a href="#第-4-章-表引擎" class="headerlink" title="第 4 章 表引擎"></a>第 4 章 表引擎</h1><h2 id="表引擎的使用"><a href="#表引擎的使用" class="headerlink" title="表引擎的使用"></a>表引擎的使用</h2><p>表引擎是 ClickHouse 的一大特色。可以说， 表引擎决定了如何存储表的数据。包括： </p>
+<p>➢ 数据的存储方式和位置，写到哪里以及从哪里读取数据。 默认存放在&#x2F;var&#x2F;lib&#x2F;clickhouse&#x2F;data</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125154423807.png" alt="image-20220125154423807"></p>
+<p>➢ 支持哪些查询以及如何支持。 </p>
+<p>➢ 并发数据访问。 </p>
+<p>➢ 索引的使用（如果存在）。</p>
+<p>➢ 是否可以执行多线程请求。 </p>
+<p>➢ 数据复制参数。 </p>
+<p>表引擎的使用方式就是必须显式在创建表时定义该表使用的引擎，以及引擎使用的相关 参数。 </p>
+<p><strong>特别注意：引擎的名称大小写敏感</strong></p>
+<h2 id="TinyLog"><a href="#TinyLog" class="headerlink" title="TinyLog"></a>TinyLog</h2><p>以列文件的形式保存在磁盘上，不支持索引，没有并发控制。一般保存少量数据的小表， 生产环境上作用有限。可以用于平时练习测试用。 如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_tinylog ( id String, name String) engine<span class="operator">=</span>TinyLog;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h2><p>内存引擎，数据以未压缩的原始形式直接保存在内存当中，服务器重启数据就会消失。 读写操作不会相互阻塞，不支持索引。简单查询下有非常非常高的性能表现（<strong>超过 10G&#x2F;s</strong>）。</p>
+<p>一般用到它的地方不多，除了用来测试，就是在需要非常高的性能，同时数据量又不太 大（上限大概 1 亿行）的场景。</p>
+<h2 id="MergeTree"><a href="#MergeTree" class="headerlink" title="MergeTree"></a>MergeTree</h2><p>ClickHouse 中<strong>最强大的表引擎当属 MergeTree</strong>（合并树）引擎及该系列（*MergeTree） 中的其他引擎，<strong>支持索引和分区</strong>，地位可以相当于 innodb 之于 Mysql。而且基于 MergeTree， 还衍生除了很多小弟，也是非常有特色的引擎。</p>
+<blockquote>
+<p>1）建表语句</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_mt(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime</span><br><span class="line">) engine <span class="operator">=</span>MergeTree</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id,sku_id);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>2）插入数据</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_mt <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>) ,</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 11:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">12000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>MergeTree 其实还有很多参数(绝大多数用默认值即可)，但是三个参数是更加重要的， 也涉及了关于 MergeTree 的很多概念。</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220125160225881.png" alt="image-20220125160225881"></p>
+<p><strong>主键不唯一，按照年月日来进行分区，同时，他们的排序是分区内的排序，排序中规定的id,sku_id表示如果id相同，就会进行sku_id排序。</strong></p>
+<h3 id="partition-by-分区-可选"><a href="#partition-by-分区-可选" class="headerlink" title="partition by 分区(可选)"></a>partition by 分区(可选)</h3><blockquote>
+<p> 1）作用</p>
+</blockquote>
+<p>学过 hive 的应该都不陌生，分区的目的主要是降低扫描的范围，优化查询速度 </p>
+<blockquote>
+<p>2）如果不填 </p>
+</blockquote>
+<p>只会使用一个分区(all)。 </p>
+<blockquote>
+<p>3）分区目录 </p>
+</blockquote>
+<p>MergeTree 是以列文件+索引文件+表定义文件组成的，但是如果设定了分区那么这些文 件就会保存到不同的分区目录中。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bin文件：数据文件</span><br><span class="line">mrk文件：标记文件，标记文件在 idx索引未见和bin数据文件之间起到了桥梁的作用。以mrk2结尾的文件，表示该表启用了自适应索引间隔。</span><br><span class="line">primary.idx文件：主键索引文件，用于加快查询效率。</span><br><span class="line">minmax_create_time.idx：分区键的最大最小值</span><br><span class="line">checksums.txt：校验文件，用于校验各个文件的正确性。存放各个文件的size以及hash值。</span><br></pre></td></tr></table></figure>
+
+<p>分区目录名的解释：</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126102405839.png" alt="image-20220126102405839"></p>
+<p>&#x3D;》Level：合并的层级，被合并的次数。合并次数越多，层级越大。</p>
+<p> 65 13</p>
+<blockquote>
+<p>4）并行 </p>
+</blockquote>
+<p>分区后，面对涉及跨分区的查询统计，ClickHouse 会以分区为单位并行处理。 </p>
+<blockquote>
+<p>5）数据写入与分区合并 </p>
+</blockquote>
+<p>任何一个批次的数据写入都会产生一个临时分区，不会纳入任何一个已有的分区。写入后的某个时刻（大概 10-15 分钟后），ClickHouse 会自动执行合并操作（等不及也可以手动 通过 optimize 执行），把临时分区的数据，合并到已有分区中。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">optimize <span class="keyword">table</span> xxxx <span class="keyword">final</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>6）例如：再次执行上面的插入操作</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_mt <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>) ,</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 11:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">12000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>查看数据并没有纳入任何分区</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126105211708.png" alt="image-20220126105211708"></p>
+<p>手动 optimize 之后</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) optimize <span class="keyword">table</span> t_order_mt <span class="keyword">final</span>; </span><br></pre></td></tr></table></figure>
+
+<p>再次查询</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126105223713.png" alt="image-20220126105223713"></p>
+<h3 id="primary-key-主键-可选"><a href="#primary-key-主键-可选" class="headerlink" title="primary key 主键(可选)"></a>primary key 主键(可选)</h3><p>ClickHouse 中的主键，和其他数据库不太一样，<strong>它只提供了数据的一级索引，但是却不是唯一约束</strong>。这就意味着是可以存在相同 primary key 的数据的。</p>
+<p>主键的设定主要依据是查询语句中的 where 条件。 </p>
+<p>根据条件通过对主键进行某种形式的二分查找，能够定位到对应的 index granularity,避免了全表扫描。</p>
+<p>index granularity： 直接翻译的话就是索引粒度，指在<strong>稀疏索引</strong>中两个相邻索引对应数 据的间隔。ClickHouse 中的 MergeTree 默认是 8192。官方不建议修改这个值，除非该列存在大量重复值，比如在一个分区中几万行才有一个不同数据。</p>
+<p><strong>稀疏索引(查找时类似于一个二分查找法)：</strong></p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126105623121.png" alt="image-20220126105623121"></p>
+<p>稀疏索引的好处就是可以用很少的索引数据，定位更多的数据，代价就是只能定位到索 引粒度的第一行，然后再进行进行一点扫描。</p>
+<h3 id="order-by（必选）"><a href="#order-by（必选）" class="headerlink" title="order by（必选）"></a>order by（必选）</h3><p>order by 设定了分区内的数据按照哪些字段顺序进行有序保存。 </p>
+<p>order by 是 MergeTree 中唯一一个必填项，甚至比 primary key 还重要，因为当用户不设置主键的情况，很多处理会依照 order by 的字段进行处理（比如后面会讲的去重和汇总）。 </p>
+<p><strong>要求：主键必须是 order by 字段的前缀字段。</strong>                               </p>
+<p>比如 order by 字段是 (id,sku_id) 那么主键必须是 id 或者(id,sku_id)</p>
+<h3 id="二级索引"><a href="#二级索引" class="headerlink" title="二级索引"></a>二级索引</h3><p>目前在 ClickHouse 的官网上二级索引的功能在 <strong>v20.1.2.4</strong> 之前是被标注为实验性的，在 这个版本之后默认是开启的。</p>
+<blockquote>
+<p>1）老版本使用二级索引前需要增加设置 </p>
+</blockquote>
+<p>是否允许使用实验性的二级索引（v20.1.2.4 开始，这个参数已被删除，默认开启）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> allow_experimental_data_skipping_indices<span class="operator">=</span><span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>2）创建测试表</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_mt2(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime,</span><br><span class="line">INDEX a total_amount TYPE minmax GRANULARITY <span class="number">5</span></span><br><span class="line">) engine <span class="operator">=</span>MergeTree</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id, sku_id);</span><br></pre></td></tr></table></figure>
+
+<p>其中 GRANULARITY N 是设定二级索引对于一级索引粒度的粒度。</p>
+<blockquote>
+<p>3）插入数据</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_mt2 <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>) ,</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 11:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">12000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>4）对比效果 </p>
+</blockquote>
+<p>那么在使用下面语句进行测试，可以看出二级索引能够为非主键字段的查询发挥作用。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[atguigu<span class="variable">@hadoop102</span> lib]$ clickhouse<span class="operator">-</span>client <span class="comment">--send_logs_level=trace &lt;&lt;&lt; &#x27;select </span></span><br><span class="line"><span class="operator">*</span> <span class="keyword">from</span> t_order_mt2 <span class="keyword">where</span> total_amount <span class="operator">&gt;</span> toDecimal32(<span class="number">900.</span>, <span class="number">2</span>)<span class="string">&#x27;;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126111755322.png" alt="image-20220126111755322"></p>
+<h3 id="数据-TTL"><a href="#数据-TTL" class="headerlink" title="数据 TTL"></a>数据 TTL</h3><p>TTL 即 Time To Live，MergeTree 提供了可以管理数据表或者列的<strong>生命周期</strong>的功能。</p>
+<blockquote>
+<p>1）列级别 TTL </p>
+</blockquote>
+<p>（1）创建测试表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_mt3(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>) TTL create_time<span class="operator">+</span><span class="type">interval</span> <span class="number">10</span> <span class="keyword">SECOND</span>,</span><br><span class="line"> create_time Datetime </span><br><span class="line">) engine <span class="operator">=</span>MergeTree</span><br><span class="line"><span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id, sku_id);</span><br></pre></td></tr></table></figure>
+
+<p>（2）插入数据（注意：根据实际时间改变）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_mt3 <span class="keyword">values</span></span><br><span class="line">(<span class="number">106</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2021-01-26 11:26:30&#x27;</span>),</span><br><span class="line">(<span class="number">107</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2021-01-26 11:26:30&#x27;</span>),</span><br><span class="line">(<span class="number">110</span>,<span class="string">&#x27;sku_003&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2021-01-26 11:26:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>（3）手动合并，查看效果 到期后，指定的字段数据归 0，然后退出命令行，再次进入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop101 :) optimize table t_order_mt3 final;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126112947496.png" alt="image-20220126112947496"></p>
+<blockquote>
+<p>2）表级 TTL </p>
+</blockquote>
+<p>下面的这条语句是数据会在 create_time 之后 10 秒丢失 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> t_order_mt3 MODIFY TTL create_time <span class="operator">+</span> <span class="type">INTERVAL</span> <span class="number">10</span> <span class="keyword">SECOND</span>; </span><br></pre></td></tr></table></figure>
+
+<p>涉及判断的字段必须是 Date 或者 Datetime 类型，推荐使用分区的日期字段。 </p>
+<p>能够使用的时间周期：</p>
+<p>- SECOND  </p>
+<p>- MINUTE </p>
+<p>- HOUR</p>
+<p>- DAY</p>
+<p>- WEEK</p>
+<p>- MONTH</p>
+<p>- QUARTER</p>
+<p>- YEAR</p>
+<h2 id="ReplacingMerge-Tree"><a href="#ReplacingMerge-Tree" class="headerlink" title="ReplacingMerge Tree"></a>ReplacingMerge Tree</h2><p>ReplacingMerge Tree 是 MergeTree 的一个变种，它存储特性完全继承 MergeTree，只是多了一个去重的功能。 尽管 MergeTree 可以设置主键，但是 primary key 其实没有唯一约束 的功能。如果你想处理掉重复的数据，可以借助这个 ReplacingMergeTree。</p>
+<blockquote>
+<p>1）去重时机 </p>
+</blockquote>
+<p><strong>数据的去重只会在合并的过程中出现。</strong>合并会在未知的时间在后台进行，所以你无法预 先作出计划。有一些数据可能仍未被处理。</p>
+<blockquote>
+<p>2）去重范围 </p>
+</blockquote>
+<p><strong>如果表经过了分区，去重只会在分区内部进行去重，不能执行跨分区的去重。</strong> </p>
+<p>所以 ReplacingMergeTree 能力有限， ReplacingMergeTree 适用于在后台清除重复的数 据以节省空间，但是它不保证没有重复的数据出现。</p>
+<blockquote>
+<p>3）案例演示 </p>
+</blockquote>
+<p>（1）创建表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_rmt(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>) ,</span><br><span class="line"> create_time Datetime </span><br><span class="line">) engine <span class="operator">=</span>ReplacingMergeTree(create_time)</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id, sku_id);</span><br></pre></td></tr></table></figure>
+
+<p>**ReplacingMergeTree() 填入的参数为版本字段，重复数据保留版本字段值最大的。 **</p>
+<p>**如果不填版本字段，默认按照插入顺序保留最后一条。 **</p>
+<p>（2）向表中插入数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_rmt <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>) ,</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 11:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">12000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>（3）执行第一次查询 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t_order_rmt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126115714243.png" alt="image-20220126115714243"></p>
+<p>（4）手动合并 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPTIMIZE <span class="keyword">TABLE</span> t_order_rmt <span class="keyword">FINAL</span>;</span><br></pre></td></tr></table></figure>
+
+<p> （5）再执行一次查询 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t_order_rmt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220126115840257.png" alt="image-20220126115840257"></p>
+<blockquote>
+<p>4）通过测试得到结论 </p>
+</blockquote>
+<p>➢ 实际上是使用 order by 字段作为唯一键 </p>
+<p>➢ 去重不能跨分区 </p>
+<p>➢ 只有同一批插入（新版本）或合并分区时才会进行去重 </p>
+<p>➢ 认定重复的数据保留，版本字段值最大的 </p>
+<p>➢ 如果版本字段相同则按插入顺序保留最后一笔</p>
+<h2 id="SummingMerge-Tree"><a href="#SummingMerge-Tree" class="headerlink" title="SummingMerge Tree"></a>SummingMerge Tree</h2><p><strong>对于不查询明细，只关心以维度进行汇总聚合结果的场景</strong>。如果只使用普通的MergeTree 的话，无论是存储空间的开销，还是查询时临时聚合的开销都比较大。 </p>
+<p>ClickHouse 为了这种场景，提供了一种能够“<strong>预聚合</strong>”的引擎 SummingMergeTree</p>
+<blockquote>
+<p>1）案例演示 </p>
+</blockquote>
+<p>（1）创建表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_smt(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>) ,</span><br><span class="line"> create_time Datetime </span><br><span class="line">) engine <span class="operator">=</span>SummingMergeTree(total_amount)</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id,sku_id );</span><br></pre></td></tr></table></figure>
+
+<p>（2）插入数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_smt <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 11:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">12000.00</span>,<span class="string">&#x27;2020-06-01 13:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>（3）执行第一次查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t_order_smt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220127075926596.png" alt="image-20220127075926596"></p>
+<p>（4）手动合并 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPTIMIZE <span class="keyword">TABLE</span> t_order_smt <span class="keyword">FINAL</span>;</span><br></pre></td></tr></table></figure>
+
+<p> （5）再执行一次查询 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t_order_smt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220127080006499.png" alt="image-20220127080006499"></p>
+<blockquote>
+<p>2）通过结果可以得到以下结论 </p>
+</blockquote>
+<p>➢ 以 SummingMergeTree（）中指定的列作为汇总数据列 </p>
+<p>➢ 可以填写多列必须数字列，如果不填，以所有非维度列且为数字列的字段为汇总数据列 </p>
+<p>➢ 以 order by 的列为准，作为维度列 </p>
+<p>➢ 其他的列按插入顺序保留第一行 </p>
+<p>➢ 不在一个分区的数据不会被聚合 </p>
+<p>➢ 只有在同一批次插入(新版本)或分片合并时才会进行聚合</p>
+<blockquote>
+<p>3）开发建议 </p>
+</blockquote>
+<p>设计聚合表的话，唯一键值、流水号可以去掉，所有字段全部是维度、度量或者时间戳。</p>
+<blockquote>
+<p>4）问题 </p>
+</blockquote>
+<p>能不能直接执行以下 SQL 得到汇总值</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> total_amount <span class="keyword">from</span> XXX <span class="keyword">where</span> province_name<span class="operator">=</span>’’ <span class="keyword">and</span> create_date<span class="operator">=</span>’xxx’ </span><br></pre></td></tr></table></figure>
+
+<p><strong>不行，可能会包含一些还没来得及聚合的临时明细</strong></p>
+<p>如果要是获取汇总值，还是需要使用 sum 进行聚合，这样效率会有一定的提高，但本 身 ClickHouse 是列式存储的，效率提升有限，不会特别明显。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">sum</span>(total_amount) <span class="keyword">from</span> province_name<span class="operator">=</span>’’ <span class="keyword">and</span> create_date<span class="operator">=</span>‘xxx’</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="第-5-章-SQL-操作"><a href="#第-5-章-SQL-操作" class="headerlink" title="第 5 章 SQL 操作"></a>第 5 章 SQL 操作</h1><p>基本上来说传统关系型数据库（以 MySQL 为例）的 SQL 语句，ClickHouse 基本都支持， 这里不会从头讲解 SQL 语法只介绍 ClickHouse 与标准 SQL（MySQL）不一致的地方。</p>
+<h2 id="Insert-基本与标准"><a href="#Insert-基本与标准" class="headerlink" title="Insert 基本与标准"></a>Insert 基本与标准</h2><p>SQL（MySQL）基本一致 </p>
+<p>（1）标准 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> [table_name] <span class="keyword">values</span>(…),(….)  </span><br></pre></td></tr></table></figure>
+
+<p>（2）从表到表的插入</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> [table_name] <span class="keyword">select</span> a,b,c <span class="keyword">from</span> [table_name_2]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="Update-和-Delete"><a href="#Update-和-Delete" class="headerlink" title="Update 和 Delete"></a>Update 和 Delete</h2><p>ClickHouse 提供了 Delete 和 Update 的能力，这类操作被称为 Mutation 查询，它可以看 做 Alter 的一种。 </p>
+<p>虽然可以实现修改和删除，但是和一般的 OLTP 数据库不一样，<strong>Mutation 语句是一种很 “重”的操作，而且不支持事务</strong>。 </p>
+<p>“重”的原因主要是每次修改或者删除都会导致放弃目标数据的原有分区，重建新分区。 所以尽量做批量的变更，不要进行频繁小数据的操作。</p>
+<p>（1）删除操作 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> t_order_smt <span class="keyword">delete</span> <span class="keyword">where</span> sku_id <span class="operator">=</span><span class="string">&#x27;sku_001&#x27;</span>; </span><br></pre></td></tr></table></figure>
+
+<p>（2）修改操作 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> t_order_smt <span class="keyword">update</span> total_amount<span class="operator">=</span>toDecimal32(<span class="number">2000.00</span>,<span class="number">2</span>) <span class="keyword">where</span> id  <span class="operator">=</span><span class="number">102</span>;</span><br></pre></td></tr></table></figure>
+
+<p> 由于操作比较“重”，所以 Mutation 语句分两步执行，同步执行的部分其实只是进行 新增数据新增分区和并把旧分区打上逻辑上的失效标记。直到触发分区合并的时候，才会删 除旧数据释放磁盘空间，一般不会开放这样的功能给用户，由管理员完成。</p>
+<h2 id="查询操作"><a href="#查询操作" class="headerlink" title="查询操作"></a>查询操作</h2><p>ClickHouse 基本上与标准 SQL 差别不大 </p>
+<p>➢ 支持子查询 </p>
+<p>➢ 支持 CTE(Common Table Expression 公用表表达式 with 子句) </p>
+<p>➢ 支持各种 JOIN，但是 JOIN 操作无法使用缓存，所以即使是两次相同的 JOIN 语句， ClickHouse 也会视为两条新 SQL </p>
+<p>➢ <strong>窗口函数(官方正在测试中…)</strong> </p>
+<p>➢ 不支持自定义函数 </p>
+<p>➢ GROUP BY 操作增加了 with rollup\with cube\with total 用来计算小计和总计。 </p>
+<blockquote>
+<p>（1）插入数据</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">alter</span> <span class="keyword">table</span> t_order_mt <span class="keyword">delete</span> <span class="keyword">where</span> <span class="number">1</span><span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_mt <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">103</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">104</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">105</span>,<span class="string">&#x27;sku_003&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">106</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-04 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">107</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-04 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">108</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-04 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">109</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-04 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">110</span>,<span class="string">&#x27;sku_003&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>（2）with rollup：<strong>从右至左去掉维度进行小计</strong></p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> id , sku_id,<span class="built_in">sum</span>(total_amount) <span class="keyword">from</span> t_order_mt <span class="keyword">group</span> <span class="keyword">by</span> id,sku_id <span class="keyword">with</span> <span class="keyword">rollup</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220127080554893.png" alt="image-20220127080554893"></p>
+<blockquote>
+<p>（3）with cube : 从右至左去掉维度进行小计，再从左至右去掉维度进行小计 </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> id , sku_id,<span class="built_in">sum</span>(total_amount) <span class="keyword">from</span> t_order_mt <span class="keyword">group</span> <span class="keyword">by</span>  id,sku_id <span class="keyword">with</span> <span class="keyword">cube</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220127080629039.png" alt="image-20220127080629039"></p>
+<blockquote>
+<p>（4）with totals: 只计算合计 </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop102 :) <span class="keyword">select</span> id , sku_id,<span class="built_in">sum</span>(total_amount) <span class="keyword">from</span> t_order_mt <span class="keyword">group</span> <span class="keyword">by</span>  id,sku_id <span class="keyword">with</span> totals;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220127080702343.png" alt="image-20220127080702343"></p>
+<h2 id="alter-操作"><a href="#alter-操作" class="headerlink" title="alter 操作"></a>alter 操作</h2><p>同 MySQL 的修改字段基本一致 </p>
+<blockquote>
+<p>1）新增字段 </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tableName <span class="keyword">add</span> <span class="keyword">column</span> newcolname String after col1; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>2）修改字段类型</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tableName modify <span class="keyword">column</span> newcolname String; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>3）删除字段 </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tableName <span class="keyword">drop</span> <span class="keyword">column</span> newcolname;</span><br></pre></td></tr></table></figure>
+
+<h2 id="导出数据"><a href="#导出数据" class="headerlink" title="导出数据"></a>导出数据</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clickhouse<span class="operator">-</span>client <span class="comment">--query &quot;select * from t_order_mt where  create_time=&#x27;2020-06-01 12:00:00&#x27;&quot; --format CSVWithNames&gt;  /opt/module/data/rs1.csv</span></span><br></pre></td></tr></table></figure>
+
+<p>更多支持格式参照：</p>
+<p><a target="_blank" rel="noopener" href="https://clickhouse.com/docs/en/interfaces/formats/#csvwithnames">Input and Output Formats | ClickHouse Documentation</a></p>
+<h1 id="第6章-副本"><a href="#第6章-副本" class="headerlink" title="第6章 副本"></a>第6章 副本</h1><p>副本的目的主要是保障数据的高可用性，即使一台 ClickHouse 节点宕机，那么也可以 从其他服务器获得相同的数据。</p>
+<h2 id="副本写入流程"><a href="#副本写入流程" class="headerlink" title="副本写入流程"></a>副本写入流程</h2><p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214161637449.png" alt="image-20220214161637449"></p>
+<h2 id="配置步骤"><a href="#配置步骤" class="headerlink" title="配置步骤"></a>配置步骤</h2><p>➢ 启动 zookeeper 集群 </p>
+<p>➢ 在hadoop101的&#x2F;etc&#x2F;clickhouse-server&#x2F;config.d目录下创建一个名为metrika.xml 的配置文件,内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop101 config.d]$ vim metrika.xml</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">yandex</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop100<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop101<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop102<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">yandex</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>➢ 同步到 hadoop100 和 hadoop102 上</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@hadoop101 config.d]<span class="comment"># xsync.sh metrika.xml</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>➢ 在 hadoop101 的&#x2F;etc&#x2F;clickhouse-server&#x2F;config.xml 中增加</p>
+</blockquote>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">include_from</span>&gt;</span>/etc/clickhouse-server/config.d/metrika.xml<span class="tag">&lt;/<span class="name">include_from</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>➢ 同步到 hadoop100 和 hadoop102上</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@hadoop101 config.d]<span class="comment"># xsync.sh /etc/clickhouse-server/config.xml  </span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>➢ 分别在 hadoop100 和 hadoop102 上启动 ClickHouse 服务 </p>
+</blockquote>
+<p>注意：因为修改了配置文件，如果以前启动了服务需要重启</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart clickhouse-server</span><br></pre></td></tr></table></figure>
+
+<p>注意：我们演示副本操作只需要在 hadoop100 和 hadoop101 两台服务器即可，上面 的操作，我们 hadoop102 可以你不用同步，我们这里为了保证集群中资源的一致性，做了 同步。</p>
+<blockquote>
+<p>➢ 在 hadoop100 和 hadoop101 上分别建表 </p>
+</blockquote>
+<p><strong>副本只能同步数据，不能同步表结构，所以我们需要在每台机器上自己手动建表</strong></p>
+<p>◼ hadoop100</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_rep2 (</span><br><span class="line">id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime</span><br><span class="line">) engine <span class="operator">=</span>ReplicatedMergeTree(<span class="string">&#x27;/clickhouse0325/table/01/t_order_rep&#x27;</span>,<span class="string">&#x27;rep_100&#x27;</span>)</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id,sku_id);</span><br></pre></td></tr></table></figure>
+
+<p>◼ hadoop101</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> t_order_rep2 (</span><br><span class="line">id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime</span><br><span class="line">) engine <span class="operator">=</span>ReplicatedMergeTree(<span class="string">&#x27;/clickhouse0325/table/01/t_order_rep&#x27;</span>,<span class="string">&#x27;rep_101&#x27;</span>)</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id,sku_id);</span><br></pre></td></tr></table></figure>
+
+<p>◼ 参数解释 </p>
+<p>ReplicatedMergeTree 中， </p>
+<p><strong>第一个参数</strong>是分片的 zk_path 一般按照： &#x2F;clickhouse&#x2F;table&#x2F;{shard}&#x2F;{table_name} 的格式写，如果只有一个分片就写 01 即可。 </p>
+<p><strong>第二个参数</strong>是副本名称，相同的分片副本名称不能相同。</p>
+<blockquote>
+<p>➢ 在 hadoop100 上执行 insert 语句</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_order_rep2 <span class="keyword">values</span></span><br><span class="line">(<span class="number">101</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">102</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">103</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">104</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">105</span>,<span class="string">&#x27;sku_003&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214185538275.png" alt="image-20220214185538275"></p>
+<blockquote>
+<p>➢ 在 hadoop101 上执行 select，可以查询出结果，说明副本配置正确</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214185622642.png" alt="image-20220214185622642"></p>
+<h1 id="第7章-分片集群"><a href="#第7章-分片集群" class="headerlink" title="第7章 分片集群"></a>第7章 分片集群</h1><p>副本虽然能够提高数据的可用性，降低丢失风险，但是每台服务器实际上必须容纳全量数据，对数据的<strong>横向扩容</strong>没有解决。 </p>
+<p>要解决数据水平切分的问题，需要引入分片的概念。通过分片把一份完整的数据进行切 分，不同的分片分布到不同的节点上，再通过 Distributed 表引擎把数据拼接起来一同使用。 </p>
+<p><strong>Distributed 表引擎本身不存储数据</strong>，有点类似于 MyCat 之于 MySql，成为一种中间 件，通过分布式逻辑表来写入、分发、路由来操作多台节点不同分片的分布式数据。</p>
+<p><strong>注意：ClickHouse 的集群是表级别的，实际企业中，大部分做了高可用，但是没有用分片，避免降低查询性能以及操作集群的复杂性。</strong></p>
+<h2 id="集群写入流程（3-分片-2-副本共-6-个节点）"><a href="#集群写入流程（3-分片-2-副本共-6-个节点）" class="headerlink" title="集群写入流程（3 分片 2 副本共 6 个节点）"></a>集群写入流程（3 分片 2 副本共 6 个节点）</h2><p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214185808766.png" alt="image-20220214185808766"></p>
+<h2 id="集群读取流程（3分片-2副本共-6个节点）"><a href="#集群读取流程（3分片-2副本共-6个节点）" class="headerlink" title="集群读取流程（3分片 2副本共 6个节点）"></a>集群读取流程（3分片 2副本共 6个节点）</h2><p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214190254490.png" alt="image-20220214190254490"></p>
+<h3 id="分片-2-副本共-6-个节点集群配置（供参考）"><a href="#分片-2-副本共-6-个节点集群配置（供参考）" class="headerlink" title="分片 2 副本共 6 个节点集群配置（供参考）"></a>分片 2 副本共 6 个节点集群配置（供参考）</h3><p>配置的位置还是在之前的&#x2F;etc&#x2F;clickhouse-server&#x2F;config.d&#x2F;metrika-shard.xml，内容如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">yandex</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">gmall_cluster</span>&gt;</span> <span class="comment">&lt;!-- 集群名称--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--集群的第一个分片--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="comment">&lt;!--该分片的第一个副本--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop100<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="comment">&lt;!--该分片的第二个副本--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop101<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--集群的第二个分片--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第一个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop101<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第二个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop102<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--集群的第三个分片--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第一个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop103<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第二个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop103<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">gmall_cluster</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">yandex</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="配置三节点版本集群及副本"><a href="#配置三节点版本集群及副本" class="headerlink" title="配置三节点版本集群及副本"></a>配置三节点版本集群及副本</h2><h3 id="集群及副本规划（2-个分片，只有第一个分片有副本）"><a href="#集群及副本规划（2-个分片，只有第一个分片有副本）" class="headerlink" title="集群及副本规划（2 个分片，只有第一个分片有副本）"></a>集群及副本规划（2 个分片，只有第一个分片有副本）</h3><p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214191832636.png" alt="image-20220214191832636"></p>
+<h3 id="配置步骤-1"><a href="#配置步骤-1" class="headerlink" title="配置步骤"></a>配置步骤</h3><blockquote>
+<p> (1)在 hadoop102 的&#x2F;etc&#x2F;clickhouse-server&#x2F;config.d 目录下创 建 metrika-shard.xml 文件</p>
+</blockquote>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">yandex</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">gmall_cluster</span>&gt;</span> <span class="comment">&lt;!-- 集群名称--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--集群的第一个分片--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第一个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop100<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第二个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop101<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--集群的第二个分片--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">internal_replication</span>&gt;</span>true<span class="tag">&lt;/<span class="name">internal_replication</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--该分片的第一个副本--&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop102<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">port</span>&gt;</span>9000<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">replica</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">shard</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">gmall_cluster</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">clickhouse_remote_servers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop100<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop101<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">node</span> <span class="attr">index</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">host</span>&gt;</span>hadoop102<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>2181<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">zookeeper-servers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">macros</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shard</span>&gt;</span>01<span class="tag">&lt;/<span class="name">shard</span>&gt;</span> <span class="comment">&lt;!--不同机器放的分片数不一样--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">replica</span>&gt;</span>rep_1_1<span class="tag">&lt;/<span class="name">replica</span>&gt;</span> <span class="comment">&lt;!--不同机器放的副本数不一样--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">macros</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">yandex</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：xml文件中的注释要删除，不能有中文注释，要不然会报错</strong></p>
+<blockquote>
+<p>(2)将 hadoop102 的 metrika-shard.xml 同步到 100 和 101，同时更新一下config.xml</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop102 ~]$ sudo ./bin/xsync.sh /etc/clickhouse-server/config.d/metrika-shard.xml </span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214193843958.png" alt="image-20220214193843958"></p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214194203990.png" alt="image-20220214194203990"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[atguigu@hadoop102 ~]$ sudo ./bin/xsync.sh /etc/clickhouse-server/config.xml</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>(3)修改 101 和 102 中 metrika-shard.xml 宏的配置</p>
+</blockquote>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195133442.png" alt="image-20220214195133442"></p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195259232.png" alt="image-20220214195259232"></p>
+<blockquote>
+<p>(6)重启三台服务器上的 ClickHouse 服务</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop clickhouse-server</span><br><span class="line">sudo systemctl start clickhouse-server</span><br><span class="line">ps -ef |grep click</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195557591.png" alt="image-20220214195557591"></p>
+<blockquote>
+<p>(7)在 hadoop100 上执行建表语句 </p>
+</blockquote>
+<p>➢ 会自动同步到 hadoop101 和 hadoop102 上 </p>
+<p>➢ 集群名字要和配置文件中的一致 </p>
+<p>➢ 分片和副本名称从配置文件的宏定义中获取</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> st_order_mt <span class="keyword">on</span> cluster gmall_cluster (</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime</span><br><span class="line">) engine <span class="operator">=</span>ReplicatedMergeTree(<span class="string">&#x27;/clickhouse/tables/&#123;shard&#125;/st_order_mt_0325&#x27;</span>,<span class="string">&#x27;&#123;replica&#125;&#x27;</span>)</span><br><span class="line"> <span class="keyword">partition</span> <span class="keyword">by</span> toYYYYMMDD(create_time)</span><br><span class="line"> <span class="keyword">primary</span> key (id)</span><br><span class="line"> <span class="keyword">order</span> <span class="keyword">by</span> (id,sku_id);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195749605.png" alt="image-20220214195749605"></p>
+<p>可以到 hadoop101 和 hadoop102 上查看表是否创建成功</p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195833328.png" alt="image-20220214195833328"></p>
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195840760.png" alt="image-20220214195840760"></p>
+<blockquote>
+<p>(8)在 hadoop100上创建 Distribute 分布式表</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> st_order_mt_all <span class="keyword">on</span> cluster gmall_cluster</span><br><span class="line">(</span><br><span class="line"> id UInt32,</span><br><span class="line"> sku_id String,</span><br><span class="line"> total_amount <span class="type">Decimal</span>(<span class="number">16</span>,<span class="number">2</span>),</span><br><span class="line"> create_time Datetime</span><br><span class="line">)engine <span class="operator">=</span> Distributed(gmall_cluster,<span class="keyword">default</span>, st_order_mt,hiveHash(sku_id));</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://fastly.jsdelivr.net/gh/dexShop/ps/image-20220214195926997.png" alt="image-20220214195926997"></p>
+<p><strong>参数含义</strong> </p>
+<p>Distributed(集群名称，库名，本地表名，分片键) </p>
+<p>分片键必须是整型数字，所以用 hiveHash 函数转换，也可以 rand()</p>
+<blockquote>
+<p>(9)在 hadoop100上插入测试数据</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> st_order_mt_all <span class="keyword">values</span></span><br><span class="line">(<span class="number">201</span>,<span class="string">&#x27;sku_001&#x27;</span>,<span class="number">1000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>) ,</span><br><span class="line">(<span class="number">202</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">203</span>,<span class="string">&#x27;sku_004&#x27;</span>,<span class="number">2500.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">204</span>,<span class="string">&#x27;sku_002&#x27;</span>,<span class="number">2000.00</span>,<span class="string">&#x27;2020-06-01 12:00:00&#x27;</span>),</span><br><span class="line">(<span class="number">205</span>,<span class="string">&#x27;sku_003&#x27;</span>,<span class="number">600.00</span>,<span class="string">&#x27;2020-06-02 12:00:00&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>(10) 通过查询分布式表和本地表观察输出结果</p>
+</blockquote>
+<p>➢ 分布式表 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> st_order_mt_all;</span><br></pre></td></tr></table></figure>
+
+<p>➢ 本地表 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> st_order_mt;</span><br></pre></td></tr></table></figure>
+
+<p> ➢ 观察数据的分布</p>
+<h2 id="项目为了节省资源，就使用单节点，不用集群"><a href="#项目为了节省资源，就使用单节点，不用集群" class="headerlink" title="项目为了节省资源，就使用单节点，不用集群"></a>项目为了节省资源，就使用单节点，不用集群</h2><p>不需要求改文件引用，因为已经使用集群建表了，如果改为引用 metrika-shard.xml 的话，启动会报错。我们以后用的时候只启动 102 即可。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">DingQuan Zuo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94ClickHouse/">http://example.com/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94ClickHouse/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">ccbigs blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></div><div class="post_share"><div class="social-share" data-image="/img/ahead.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Hive/" title="大数据——Hive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">大数据——Hive</div></div></a></div><div class="next-post pull-right"><a href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Scala/" title="大数据——Scala"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">大数据——Scala</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/06/26/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Hbase/" title="大数据——Hbase"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-06-26</div><div class="title">大数据——Hbase</div></div></a></div><div><a href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Flume/" title="大数据——Flume"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-06-27</div><div class="title">大数据——Flume</div></div></a></div><div><a href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Scala/" title="大数据——Scala"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-06-27</div><div class="title">大数据——Scala</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/ahead.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">DingQuan Zuo</div><div class="author-info__description">技术路上少不了自我怀疑，往往你的决定，会让你看到不同的风景</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ccbigs" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1692062014@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC-1-%E7%AB%A0-ClickHouse-%E5%85%A5%E9%97%A8"><span class="toc-number">1.</span> <span class="toc-text">第 1 章 ClickHouse 入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ClickHouse-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">ClickHouse 的特点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">列式存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DBMS-%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-number">1.1.2.</span> <span class="toc-text">DBMS 的功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E6%A0%B7%E5%8C%96%E5%BC%95%E6%93%8E"><span class="toc-number">1.1.3.</span> <span class="toc-text">多样化引擎</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E5%90%9E%E5%90%90%E5%86%99%E5%85%A5%E8%83%BD%E5%8A%9B"><span class="toc-number">1.1.4.</span> <span class="toc-text">高吞吐写入能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%88%86%E5%8C%BA%E4%B8%8E%E7%BA%BF%E7%A8%8B%E7%BA%A7%E5%B9%B6%E8%A1%8C"><span class="toc-number">1.1.5.</span> <span class="toc-text">数据分区与线程级并行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94"><span class="toc-number">1.1.6.</span> <span class="toc-text">性能对比</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC-2-%E7%AB%A0-ClickHouse-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">第 2 章 ClickHouse 的安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">准备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AE%E5%AE%9A%E9%98%B2%E7%81%AB%E5%A2%99%E5%A4%84%E4%BA%8E%E5%85%B3%E9%97%AD%E7%8A%B6%E6%80%81"><span class="toc-number">2.1.1.</span> <span class="toc-text">确定防火墙处于关闭状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CentOS-%E5%8F%96%E6%B6%88%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%E6%95%B0%E9%99%90%E5%88%B6"><span class="toc-number">2.1.2.</span> <span class="toc-text">CentOS 取消打开文件数限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.3.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CentOS-%E5%8F%96%E6%B6%88-SELINUX"><span class="toc-number">2.1.4.</span> <span class="toc-text">CentOS 取消 SELINUX</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E6%9C%BA%E5%AE%89%E8%A3%85"><span class="toc-number">2.2.</span> <span class="toc-text">单机安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8-hadoop102-%E7%9A%84-x2F-opt-x2F-software-%E4%B8%8B%E5%88%9B%E5%BB%BA-clickhouse-%E7%9B%AE%E5%BD%95"><span class="toc-number">2.2.1.</span> <span class="toc-text">在 hadoop102 的&#x2F;opt&#x2F;software 下创建 clickhouse 目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8%E5%88%B0software"><span class="toc-number">2.2.2.</span> <span class="toc-text">移动到software</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%86%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5%E5%88%B0-hadoop100%E3%80%81hadoop102"><span class="toc-number">2.2.3.</span> <span class="toc-text">将安装文件同步到 hadoop100、hadoop102</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%88%AB%E5%9C%A8%E4%B8%89%E5%8F%B0%E6%9C%BA%E5%AD%90%E4%B8%8A%E5%AE%89%E8%A3%85%E8%BF%99-4-%E4%B8%AA-rpm-%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.4.</span> <span class="toc-text">分别在三台机子上安装这 4 个 rpm 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.5.</span> <span class="toc-text">修改配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8-Server"><span class="toc-number">2.2.6.</span> <span class="toc-text">启动 Server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-client-%E8%BF%9E%E6%8E%A5-server"><span class="toc-number">2.2.7.</span> <span class="toc-text">使用 client 连接 server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%B8%E8%BD%BD-clickHouse"><span class="toc-number">2.2.8.</span> <span class="toc-text">卸载 clickHouse</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC-3-%E7%AB%A0-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">第 3 章 数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">整型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E5%9E%8B"><span class="toc-number">3.2.</span> <span class="toc-text">浮点型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%83%E5%B0%94%E5%9E%8B"><span class="toc-number">3.3.</span> <span class="toc-text">布尔型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Decimal-%E5%9E%8B"><span class="toc-number">3.4.</span> <span class="toc-text">Decimal 型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.5.</span> <span class="toc-text">字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.6.</span> <span class="toc-text">枚举类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.7.</span> <span class="toc-text">时间类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">3.8.</span> <span class="toc-text">数组</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC-4-%E7%AB%A0-%E8%A1%A8%E5%BC%95%E6%93%8E"><span class="toc-number">4.</span> <span class="toc-text">第 4 章 表引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A8%E5%BC%95%E6%93%8E%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">4.1.</span> <span class="toc-text">表引擎的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TinyLog"><span class="toc-number">4.2.</span> <span class="toc-text">TinyLog</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Memory"><span class="toc-number">4.3.</span> <span class="toc-text">Memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MergeTree"><span class="toc-number">4.4.</span> <span class="toc-text">MergeTree</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#partition-by-%E5%88%86%E5%8C%BA-%E5%8F%AF%E9%80%89"><span class="toc-number">4.4.1.</span> <span class="toc-text">partition by 分区(可选)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#primary-key-%E4%B8%BB%E9%94%AE-%E5%8F%AF%E9%80%89"><span class="toc-number">4.4.2.</span> <span class="toc-text">primary key 主键(可选)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#order-by%EF%BC%88%E5%BF%85%E9%80%89%EF%BC%89"><span class="toc-number">4.4.3.</span> <span class="toc-text">order by（必选）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="toc-number">4.4.4.</span> <span class="toc-text">二级索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE-TTL"><span class="toc-number">4.4.5.</span> <span class="toc-text">数据 TTL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ReplacingMerge-Tree"><span class="toc-number">4.5.</span> <span class="toc-text">ReplacingMerge Tree</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SummingMerge-Tree"><span class="toc-number">4.6.</span> <span class="toc-text">SummingMerge Tree</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC-5-%E7%AB%A0-SQL-%E6%93%8D%E4%BD%9C"><span class="toc-number">5.</span> <span class="toc-text">第 5 章 SQL 操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Insert-%E5%9F%BA%E6%9C%AC%E4%B8%8E%E6%A0%87%E5%87%86"><span class="toc-number">5.1.</span> <span class="toc-text">Insert 基本与标准</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Update-%E5%92%8C-Delete"><span class="toc-number">5.2.</span> <span class="toc-text">Update 和 Delete</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%93%8D%E4%BD%9C"><span class="toc-number">5.3.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#alter-%E6%93%8D%E4%BD%9C"><span class="toc-number">5.4.</span> <span class="toc-text">alter 操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%87%BA%E6%95%B0%E6%8D%AE"><span class="toc-number">5.5.</span> <span class="toc-text">导出数据</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC6%E7%AB%A0-%E5%89%AF%E6%9C%AC"><span class="toc-number">6.</span> <span class="toc-text">第6章 副本</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%AF%E6%9C%AC%E5%86%99%E5%85%A5%E6%B5%81%E7%A8%8B"><span class="toc-number">6.1.</span> <span class="toc-text">副本写入流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="toc-number">6.2.</span> <span class="toc-text">配置步骤</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC7%E7%AB%A0-%E5%88%86%E7%89%87%E9%9B%86%E7%BE%A4"><span class="toc-number">7.</span> <span class="toc-text">第7章 分片集群</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E5%86%99%E5%85%A5%E6%B5%81%E7%A8%8B%EF%BC%883-%E5%88%86%E7%89%87-2-%E5%89%AF%E6%9C%AC%E5%85%B1-6-%E4%B8%AA%E8%8A%82%E7%82%B9%EF%BC%89"><span class="toc-number">7.1.</span> <span class="toc-text">集群写入流程（3 分片 2 副本共 6 个节点）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E8%AF%BB%E5%8F%96%E6%B5%81%E7%A8%8B%EF%BC%883%E5%88%86%E7%89%87-2%E5%89%AF%E6%9C%AC%E5%85%B1-6%E4%B8%AA%E8%8A%82%E7%82%B9%EF%BC%89"><span class="toc-number">7.2.</span> <span class="toc-text">集群读取流程（3分片 2副本共 6个节点）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E7%89%87-2-%E5%89%AF%E6%9C%AC%E5%85%B1-6-%E4%B8%AA%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AE%EF%BC%88%E4%BE%9B%E5%8F%82%E8%80%83%EF%BC%89"><span class="toc-number">7.2.1.</span> <span class="toc-text">分片 2 副本共 6 个节点集群配置（供参考）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%89%E8%8A%82%E7%82%B9%E7%89%88%E6%9C%AC%E9%9B%86%E7%BE%A4%E5%8F%8A%E5%89%AF%E6%9C%AC"><span class="toc-number">7.3.</span> <span class="toc-text">配置三节点版本集群及副本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E5%8F%8A%E5%89%AF%E6%9C%AC%E8%A7%84%E5%88%92%EF%BC%882-%E4%B8%AA%E5%88%86%E7%89%87%EF%BC%8C%E5%8F%AA%E6%9C%89%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%88%86%E7%89%87%E6%9C%89%E5%89%AF%E6%9C%AC%EF%BC%89"><span class="toc-number">7.3.1.</span> <span class="toc-text">集群及副本规划（2 个分片，只有第一个分片有副本）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4-1"><span class="toc-number">7.3.2.</span> <span class="toc-text">配置步骤</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E4%B8%BA%E4%BA%86%E8%8A%82%E7%9C%81%E8%B5%84%E6%BA%90%EF%BC%8C%E5%B0%B1%E4%BD%BF%E7%94%A8%E5%8D%95%E8%8A%82%E7%82%B9%EF%BC%8C%E4%B8%8D%E7%94%A8%E9%9B%86%E7%BE%A4"><span class="toc-number">7.4.</span> <span class="toc-text">项目为了节省资源，就使用单节点，不用集群</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Hive/" title="大数据——Hive">大数据——Hive</a><time datetime="2023-06-27T04:21:43.000Z" title="发表于 2023-06-27 12:21:43">2023-06-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94ClickHouse/" title="大数据——ClickHouse">大数据——ClickHouse</a><time datetime="2023-06-27T04:14:07.000Z" title="发表于 2023-06-27 12:14:07">2023-06-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Scala/" title="大数据——Scala">大数据——Scala</a><time datetime="2023-06-27T03:52:08.000Z" title="发表于 2023-06-27 11:52:08">2023-06-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/06/27/Linux%E2%80%94%E2%80%94Shell/" title="Linux——Shell">Linux——Shell</a><time datetime="2023-06-27T03:47:15.000Z" title="发表于 2023-06-27 11:47:15">2023-06-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/06/27/%E5%A4%A7%E6%95%B0%E6%8D%AE%E2%80%94%E2%80%94Flume/" title="大数据——Flume">大数据——Flume</a><time datetime="2023-06-27T03:38:37.000Z" title="发表于 2023-06-27 11:38:37">2023-06-27</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By DingQuan Zuo</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
