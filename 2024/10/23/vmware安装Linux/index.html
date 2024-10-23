@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>vmware安装Linux | ccbigs blog</title><meta name="author" content="DingQuan Zuo"><meta name="copyright" content="DingQuan Zuo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="vmware安装Linux1. 虚拟机安装1.1. 环境宿主机系统：Windows7 64位及高版本系统 、 宿主机内存：最低4G，建议使用8G  宿主机硬盘：最低空闲硬盘 30G  虚拟化软件：VMware 12及以上版本  Linux镜像：CentOS 7  ###资源 CentOS-7-x86_64-DVD-1804.iso、VMware15.5 Pro  1.2. 步骤 步骤一：在Wind">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vmware安装Linux">
+<meta property="og:url" content="http://example.com/2024/10/23/vmware%E5%AE%89%E8%A3%85Linux/index.html">
+<meta property="og:site_name" content="ccbigs blog">
+<meta property="og:description" content="vmware安装Linux1. 虚拟机安装1.1. 环境宿主机系统：Windows7 64位及高版本系统 、 宿主机内存：最低4G，建议使用8G  宿主机硬盘：最低空闲硬盘 30G  虚拟化软件：VMware 12及以上版本  Linux镜像：CentOS 7  ###资源 CentOS-7-x86_64-DVD-1804.iso、VMware15.5 Pro  1.2. 步骤 步骤一：在Wind">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/ahead.jpg">
+<meta property="article:published_time" content="2024-10-23T00:20:33.000Z">
+<meta property="article:modified_time" content="2024-10-23T04:28:53.053Z">
+<meta property="article:author" content="DingQuan Zuo">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="appInstall">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/ahead.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/10/23/vmware%E5%AE%89%E8%A3%85Linux/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vmware安装Linux',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-10-23 12:28:53'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/ahead.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">28</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/1558.png')"><nav id="nav"><span id="blog-info"><a href="/" title="ccbigs blog"><img class="site-icon" src="/img/favicon.png"/><span class="site-name">ccbigs blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">vmware安装Linux</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-10-23T00:20:33.000Z" title="发表于 2024-10-23 08:20:33">2024-10-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-10-23T04:28:53.053Z" title="更新于 2024-10-23 12:28:53">2024-10-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">775</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="vmware安装Linux"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="vmware安装Linux"><a href="#vmware安装Linux" class="headerlink" title="vmware安装Linux"></a>vmware安装Linux</h1><h1 id="1-虚拟机安装"><a href="#1-虚拟机安装" class="headerlink" title="1. 虚拟机安装"></a>1. 虚拟机安装</h1><h2 id="1-1-环境"><a href="#1-1-环境" class="headerlink" title="1.1. 环境"></a>1.1. 环境</h2><p>宿主机系统：Windows7 64位及高版本系统 、</p>
+<p>宿主机内存：最低4G，建议使用8G </p>
+<p>宿主机硬盘：最低空闲硬盘 30G </p>
+<p>虚拟化软件：VMware 12及以上版本 </p>
+<p>Linux镜像：CentOS 7 </p>
+<p>###资源 CentOS-7-x86_64-DVD-1804.iso、VMware15.5 Pro </p>
+<h2 id="1-2-步骤"><a href="#1-2-步骤" class="headerlink" title="1.2. 步骤"></a>1.2. 步骤</h2><ul>
+<li>步骤一：在Windows上安装VMware虚拟化软件。</li>
+</ul>
+<p>（安装过程通过其他Windows安装软件类似） </p>
+<ul>
+<li>步骤二：创建虚拟机</li>
+</ul>
+<p>打开VMware，【文件】–&gt;【新建虚拟机(N)…】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082609247.png" alt="image-20241023082609247"></p>
+<p>配置类型：【自定义(高级)】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082634017.png" alt="image-20241023082634017"></p>
+<p>【选择虚拟机硬件兼容性】：使用默认即可 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082654379.png" alt="image-20241023082654379"></p>
+<p>【安装客户机操作系统】：选择【稍后安装操作系统】（注意：在使用VMware Pro15的时候，如果选 择【安装程序光盘映射文件】时会进入【简易安装】，该安装虽然简单，但一些常用配置无法手动指 定，可以选择【稍后安装操作系统】，进入常规CentOS安装即可取消【简易安装】） </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082747866.png" alt="image-20241023082747866"></p>
+<p>【选择客户机操作系统】：客户机操作系统选择【Linux】，版本选择【CentOS 7 64位】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082815125.png" alt="image-20241023082815125"></p>
+<p>【命名虚拟机】：指定虚拟机的名称（可以为任意名称），也可以在指定名称的过程中指定虚拟机存放 的位置 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023082929499.png" alt="image-20241023082929499"></p>
+<p>【处理器配置】：选择默认即可 </p>
+<p>【虚拟机内存】：如果宿主机内存为4G，虚拟机内存可设置为512MB，如果宿主机为8G，可为虚拟机 设置1G内存 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023083023260.png" alt="image-20241023083023260"></p>
+<p>【网络类型】：选择【使用网络地址转换(NAT)】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023083049266.png" alt="image-20241023083049266"></p>
+<p>【选择I&#x2F;O控制器类型】：选择默认即可 </p>
+<p>【选择磁盘类型】：选择默认即可 </p>
+<p>【选择磁盘】：选择【创建新虚拟磁盘】 </p>
+<p>【指定磁盘容量】：通常为虚拟机指定20G左右的磁盘即可，并指定存储为单个文件，便于拷贝备份。 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023083145786.png" alt="image-20241023083145786"></p>
+<p>【指定磁盘文件】：通常将虚拟机磁盘文件指定到虚拟机存储位置，便于管理虚拟机 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023084342559.png" alt="image-20241023084342559"></p>
+<p>【已准备好创建虚拟机】：直接选择【完成】即可 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023084408137.png" alt="image-20241023084408137"></p>
+<p>步骤三：安装CentOS 7 </p>
+<p>【设置ISO文件到虚拟机】</p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023084524605.png" alt="image-20241023084524605"></p>
+<p> 通常情况下，当虚拟机安装成功之后，会自动启动，进入安装界面。选择【Install CentOS 7】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085241411.png" alt="image-20241023085241411"></p>
+<p>安装过程中使用【中文】–&gt;【简体中文（中国）】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085441008.png" alt="image-20241023085441008"></p>
+<p>此时进入【安装信息摘要】界面： </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085521543.png" alt="image-20241023085521543"></p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085644243.png" alt="image-20241023085644243"></p>
+<p>选择【软件】–&gt;【软件选择】：【基础设施服务器】 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085558956.png" alt="image-20241023085558956"></p>
+<p>选择【系统】–&gt;【安装位置】：默认（直接点击【完成】） </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085727229.png" alt="image-20241023085727229"></p>
+<p>选择【网络和主机名】： </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023090033317.png" alt="image-20241023090033317"></p>
+<p>网卡设置： </p>
+<p>地址：192.168.56.100 </p>
+<p>子网掩码：255.255.255.0 </p>
+<p>网关&#x3D;192.168.56.2 </p>
+<p>DNS服务器&#x3D;8.8.8.8 </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023085950417.png" alt="image-20241023085950417"></p>
+<p>启动网卡： </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023090114280.png" alt="image-20241023090114280"></p>
+<p>检查Linux配置，并开始安装Linux： </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023090204084.png" alt="image-20241023090204084"></p>
+<p>设置ROOT用户密码： </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023090235543.png" alt="image-20241023090235543"></p>
+<p>此时Linux配置完成，等待自动安装。安装完成之后，会显示【重启】按钮，重启Linux即可： </p>
+<p>重启之后，进入登录界面，输入用户名称：root和输入密码（在输入密码时，不显示密码的输入过程） </p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023091342389.png" alt="image-20241023091342389"></p>
+<p>出现下面的内容，表示CentOS 7安装成功。</p>
+<p><img src="https://ccbigsbyzdqphoto.oss-cn-guangzhou.aliyuncs.com/image-20241023091417337.png" alt="image-20241023091417337"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">DingQuan Zuo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/10/23/vmware%E5%AE%89%E8%A3%85Linux/">http://example.com/2024/10/23/vmware%E5%AE%89%E8%A3%85Linux/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">ccbigs blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/appInstall/">appInstall</a></div><div class="post_share"><div class="social-share" data-image="/img/ahead.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/10/22/%E9%BB%91%E7%9A%AE%E4%B9%A6%E2%80%94%E2%80%94%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B%E6%96%B9%E6%B3%95/" title="黑皮书——计算机网络自顶向下方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">黑皮书——计算机网络自顶向下方法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/06/27/Linux%E2%80%94%E2%80%94Shell/" title="Linux——Shell"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-06-27</div><div class="title">Linux——Shell</div></div></a></div><div><a href="/2024/10/21/appInstall%E2%80%94%E2%80%94Java%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/" title="appInstall——Java安装步骤"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-21</div><div class="title">appInstall——Java安装步骤</div></div></a></div><div><a href="/2024/02/15/appInstall%E2%80%94%E2%80%94Rust%20Windows%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/" title="Rust Windows安装教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-15</div><div class="title">Rust Windows安装教程</div></div></a></div><div><a href="/2024/06/28/appInstall%E2%80%94%E2%80%94mysql_windows%E7%89%88%E8%87%AA%E5%AE%9A%E4%B9%89%E7%AE%80%E6%98%93%E5%8C%96%E5%AE%89%E8%A3%85/" title="appInstall——mysql_windows版自定义简易化安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">appInstall——mysql_windows版自定义简易化安装</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/ahead.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">DingQuan Zuo</div><div class="author-info__description">计算机很适合我这样的蠢人学，因为代码就在那里</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">28</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ccbigs" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="https://blog.csdn.net/zuodingquan666" target="_blank" title="CSDN"><i class="fas fa-c" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1692062014@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#vmware%E5%AE%89%E8%A3%85Linux"><span class="toc-text">vmware安装Linux</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%89%E8%A3%85"><span class="toc-text">1. 虚拟机安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E7%8E%AF%E5%A2%83"><span class="toc-text">1.1. 环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%AD%A5%E9%AA%A4"><span class="toc-text">1.2. 步骤</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/23/vmware%E5%AE%89%E8%A3%85Linux/" title="vmware安装Linux">vmware安装Linux</a><time datetime="2024-10-23T00:20:33.000Z" title="发表于 2024-10-23 08:20:33">2024-10-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/22/%E9%BB%91%E7%9A%AE%E4%B9%A6%E2%80%94%E2%80%94%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B%E6%96%B9%E6%B3%95/" title="黑皮书——计算机网络自顶向下方法">黑皮书——计算机网络自顶向下方法</a><time datetime="2024-10-22T12:14:56.000Z" title="发表于 2024-10-22 20:14:56">2024-10-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/21/appInstall%E2%80%94%E2%80%94Java%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/" title="appInstall——Java安装步骤">appInstall——Java安装步骤</a><time datetime="2024-10-21T02:20:13.000Z" title="发表于 2024-10-21 10:20:13">2024-10-21</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/1558.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By DingQuan Zuo</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">道可道，非恒道也！</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
